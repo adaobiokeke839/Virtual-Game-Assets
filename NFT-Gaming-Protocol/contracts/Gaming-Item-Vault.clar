@@ -1,5 +1,4 @@
 ;; GameAsset Pro - Advanced Gaming NFT Marketplace & Management System
-
 ;; A comprehensive SIP-009 compliant NFT implementation designed specifically for gaming ecosystems
 ;; Features: Item creation, marketplace trading, item upgrading, batch operations, and creator management
 
@@ -520,12 +519,17 @@
   (let
     (
       (recipe-data (unwrap! (map-get? asset-upgrade-recipes recipe-identifier) ERROR_ASSET_NOT_FOUND))
+      (validated-recipe-id recipe-identifier)
+      (validated-enabled-status recipe-enabled)
     )
     ;; Authorization Check
     (asserts! (is-eq tx-sender (var-get contract-administrator)) ERROR_UNAUTHORIZED_ACCESS)
     
-    (map-set asset-upgrade-recipes recipe-identifier 
-      (merge recipe-data {recipe-enabled: recipe-enabled}))
+    ;; Additional validation to ensure recipe-identifier is valid
+    (asserts! (> validated-recipe-id u0) ERROR_INVALID_INPUT_PARAMETER)
+    
+    (map-set asset-upgrade-recipes validated-recipe-id 
+      (merge recipe-data {recipe-enabled: validated-enabled-status}))
     
     (ok true)
   )
